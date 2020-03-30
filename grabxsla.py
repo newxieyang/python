@@ -1,8 +1,8 @@
 #! python
 # coding=UTF-8
-from requests import session
 from bs4 import BeautifulSoup
-from user_agent import generate_user_agent
+from file_utils import  write_file
+from  net_utils  import fetch_source
 
 # 网站url
 web_site_url = 'https://www.booktxt.net/'
@@ -22,7 +22,7 @@ content_node = "#content"
 
 
 def grab_novel():
-    bs = fetch_source(novel_url)
+    bs = get_net_content(novel_url)
 
     file_name = file_save_dir + get_file_name(bs)
 
@@ -46,18 +46,9 @@ def grab_novel():
 
 
 # 读取网络资源
-def fetch_source(source_url):
-    headers = {
-        'User-Agent': generate_user_agent(device_type='desktop', os=('mac', 'linux', 'win', 'android'))
-    }
-
-    s = session()
-    resp = s.get(source_url, headers=headers)
-    resp.encoding = resp.apparent_encoding
-    if resp.status_code == 200:
-        return BeautifulSoup(resp.text, "html.parser")
-    else:
-        fetch_source(source_url)
+def get_net_content(source_url):
+    res = fetch_source(source_url)
+    return BeautifulSoup(res, "html.parser")
 
 
 # 获取文件名
@@ -68,7 +59,7 @@ def get_file_name(bs):
 # 获取内容
 def get_content(catalog_url):
     print(catalog_url)
-    bs = fetch_source(catalog_url)
+    bs = get_net_content(catalog_url)
     # print bs
     try:
         title = bs.select(title_node)[0].text
@@ -82,15 +73,7 @@ def get_content(catalog_url):
     return ""
 
 
-# 写文件
-def write_file(file_name, content):
-    print(file_name)
 
-    try:
-        f = open(file_name, 'a')
-        f.write(content)
-    finally:
-        f.close()
 
 
 if __name__ == '__main__':

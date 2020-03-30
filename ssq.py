@@ -5,19 +5,15 @@ import random
 from hashlib import md5
 from requests import get
 from bs4 import BeautifulSoup
-from user_agent import generate_user_agent
-from sqlCommon import *
+from net_utils  import get
+from sql_utils import *
 
 import time
 
 
 def request_content(start, end):
-    url_link = 'https://datachart.500.com/ssq/history/newinc/history.php?start={0}&end={1}'.format(start, end)
-    headers = {
-        'User-Agent': generate_user_agent(device_type='desktop', os=('mac', 'linux', 'win', 'android'))
-    }
-    response = get(url_link, headers=headers, timeout=6)
-    page_content = BeautifulSoup(response.content, "html.parser")
+    url = 'https://datachart.500.com/ssq/history/newinc/history.php?start={0}&end={1}'.format(start, end)
+    page_content = BeautifulSoup(get(url), "html.parser")
     html_tag = page_content.find_all('tbody', id='tdata')[0]
     return html_tag.find_all('tr', 't_tr1')
 
@@ -107,19 +103,6 @@ def check_ssq(md5_string):
 def generate_ssq():
     blue = random.randint(1, 16)
 
-    #
-    # s = ''
-    # for i in reds:
-    #     s += "%02d " % i
-    #     # 02d表示是2位数的整数，个数自动补0
-    # print(s + "+ " + "%02d" % blue)
-
-    # lists = list(range(1, 34))
-    # # 重新排序
-    # random.shuffle(lists)
-    # red_ball = lists[0:6]
-    # red_ball.sort()
-    # print(red_ball)
 
     list2 = list(range(1, 34))
     # 数组里面 随机取样
@@ -144,9 +127,23 @@ def generate_ssq():
     # print(data_string)
 
 
-if __name__ == '__main__':
-    generate_ssq()
+def check1_ssq():
+    data_string = '4-5-15-25-27-31-05'
+    md5_string = md5(data_string.encode("utf-8")).hexdigest()
 
+    return_val = check_ssq(md5_string)
+
+    is_exist = int(return_val[0])
+
+    if is_exist > 0:
+        print("已经存在")
+    else:
+        print("不存在")
+
+
+if __name__ == '__main__':
+    # generate_ssq()
+    check1_ssq()
     # check_ssq("hhh")
     # grab_ssq()
     # word = ['1', '9', '3', '7']
